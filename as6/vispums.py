@@ -1,88 +1,122 @@
 # -*- coding: utf-8 -*-
 """
-This program computes loads the PUMS dataset and prepares some visualizations based on the data
-Students:   Jenna Lopes, Geoffrey Stewart, Ryan Wade
-Date:       Feb. 24, 2020
-Course:     DATA-51100-002: 	Statistical Programming
+This program does data visualiations of various attributes from the ACS PUMS dataset
+Students:   Ryan Wade, Geoffrey, Jenna
+Date:       Feb. 22, 2020
+Course:     CPSC-51100
 Semester:   Spring 2020
 Assignment: PROGRAMMING ASSIGNMENT #6
-
 """
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
+def hh1_plot(fig, df):
+    hhl = df['HHL'].value_counts()
+
+    # create the pie chart
+    ax = fig.add_subplot(2, 2, 1)
+    ax.axis('equal')
+    pie = ax.pie(hhl, startangle=-117)
+
+    # add the legend
+    language = ['English only',
+                'Spanish',
+                'Other Indo-European languages',
+                'Asian and Pacific Island languages',
+                'Other language']
+
+    ax.legend(language, loc='upper left',
+              bbox_to_anchor=(0.1, 0.93),
+              fontsize='small')
+
+    # add the title
+    plt.title('Household Languages')
+
+def income_plot(fig, df):
+    # filter out missing data
+    hincp = df.HINCP[df.HINCP.notna()]
+
+    # create the histogram
+    ax = fig.add_subplot(2, 2, 2)
+    bins = np.logspace(1, 7, num=100, base=10)
+
+    hist = ax.hist(x=hincp,
+                   density=True,
+                   bins=bins,
+                   histtype='bar',
+                   color='g',
+                   linewidth=0.6)
+    plt.xscale('log', nonposx='clip', subsx=[1, 2, 3, 4, 5, 6, 7])
+    hincp.plot.kde(ax=ax, style='--', color = 'black', logx=True)
+    ax.grid(linestyle='--')
+
+    # add labels and title
+    plt.ylabel('Density')
+    plt.xlabel('Household Income ($) - Log Scaled')
+    plt.title('Distribution of Household Income')
+
+def vehicle_plot(fig, df):
+    # aggregate the data
+    veh = df.groupby('VEH').aggregate({'WGTP':'sum'})
+
+    # create the bar chart
+    ax = fig.add_subplot(2, 2, 3)
+    ax.bar(veh.index,
+           veh.WGTP / 1000,
+           align='center',
+           color='red',
+           tick_label=[int(x) for x in veh.index])
+
+    # add labels and title
+    plt.ylabel('Thousands of Households')
+    plt.xlabel('# of Vehicles')
+    plt.title('Vehicles Available in Households')
+
+def taxes_plot(fig, df):
+    # create the mapping between the TAXP to $ value
+    mapping={1:0,2:1,3:50,63:5500,64:6000,65:7000,66:8000,67:9000,68:10000}
+    for i in range(4,63):
+        if(i<23):
+            mapping[i] = mapping[i-1]+50
+        else:
+            mapping[i] = mapping[i-1]+100
+
+    #replace the value of TAXP with the mapping value
+    df['TAXP'].replace(mapping,inplace=True)
+
+    # create the scatter plot
+    ax = fig.add_subplot(2, 2, 4)
+    plt.scatter(df['VALP'],df['TAXP'],c=df['MRGP'],s=df['WGTP'],alpha=0.25,cmap='seismic')
+    plt.colorbar(ticks=[0,1250,2500,3750,5000]).set_label('First Mortgage Payment (Monthly $)')
+    plt.ylim(ymin=0,ymax=11000)
+    plt.xlim(xmin=0,xmax=1200000)
+
+    # add labels and title
+    plt.xlabel('Property Value ($)')
+    plt.ylabel('Taxes ($)')
+    plt.title('Property Taxes vs. Property Values')
 
 def main():
-    # log the required output header
-    print('DATA-51100, Spring 2020')
-    print('NAMES: Jenna Lopes, Geoffrey Stewart, Ryan Wade')
-    print('PROGRAMMING ASSIGNMENT #6')
-    print('')
+    # Create the figure
+    fig = plt.figure(figsize=(20, 10))
+    plt.subplots_adjust(wspace=.3, hspace=.3)
 
-    df = pd.read_csv('ss13hil.csv')
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-    ax1 = fig.add_subplot(2,2,1) 
-    ax2 = fig.add_subplot(2,2,2)
-    ax3 = fig.add_subplot(2,2,3)
-    ax4 = fig.add_subplot(2,2,4)
+    # Read the csv file
+    df = pd.read_csv("ss13hil.csv")
 
-    hhl = df['HHL'].value_counts()
-    hhl.index = ['English only', 'Spanish', 'Other Indo-European languages', 'Asian and Pacific Island languages', 'Other language']
-    axes[0, 0].pie(hhl, startangle=242)
-    axes[0, 0].legend(bbox_to_anchor=(-0.4, 1), loc="upper left", labels=hhl.index)
-    axes[0, 0].set_title('Household Languages')
-    axes[0, 0].set_ylabel('HHL')
-    plt.show()
+    # Add the plots to the figures
+    hh1_plot(fig, df)
+    income_plot(fig, df)
+    vehicle_plot(fig, df)
+    taxes_plot(fig, df)
 
-def bar_chart(ax):
-    grouped = df.groupby('VEH')['WGTP'].sum()/1000
-    ax.bar(grouped.index,grouped.values,width=0.9,bottom=None,color='r',align='center')
-    ax.set_title('Vehicles Available in Households',fontsize=8)
-    ax.set_xlabel('# of Vehicles',fontsize=8)
-    ax.set_ylabel('Thousands of Households',fontsize=8)
-    ax.set_xticks(grouped.index)
-        
-    ax3 = fig.add_subplot(2,2,3)
-    bar_chart(ax3)
-    ax3.tick_params(axis='both', which='major', labelsize=8)
-    ax3.tick_params(axis='both', which='minor', labelsize=8)
-    plt.show()
-    
-def scatter_plot ():
-    scatter.set_title("Property Taxes vs. Property Values", fontsize = 12)
-    plt.xlabel("Property Value ($)", fontsize = 10)
-    plt.ylabel("Taxes ($)", fontsize = 10)
-    scatter.set_xlim([0, 1200000])
-    scatter.set_ylim([0, 10500])
-    scatter.tick_params(labelsize = 10)
+    # Export to png file
+    plt.savefig('pums.png')
 
-    taxp_ref = {1: 0, 2: 1}
-    counter = 0
-    for key in range(3, 23):
-        counter += 50
-        taxp_ref[key] = counter
-    for key in range(23, 63):
-        counter += 100
-        taxp_ref[key] = counter
-    for key in range(63, 65):
-        counter += 500
-        taxp_ref[key] = counter
-    for key in range(65, 69):
-        counter += 1000
-        taxp_ref[key] = counter
-
-    taxp_convert = []
-    for key in data["TAXP"]:
-        if taxp_ref.has_key(key):
-            taxp_convert.append(taxp_ref[key])
-        else:
-            taxp_convert.append(np.NaN)
-
-    mappable = scatter.scatter(data["VALP"], taxp_conv, s = data["WGTP"], c = data["MRGP"], cmap = "seismic", alpha = 0.18)
-    colorbar = fig.colorbar(mappable, ticks = [1250, 2500, 3750, 5000])
-    colorbar.set_label("First Mortgage Payment (Monthly $)", fontsize = 10)
-    plt.show()
-    
 if __name__ == "__main__":
+    print("CPSC-51100, Spring 2020")
+    print("Name: Ryan Wade, Geoffrey, Jenna")
+    print("PROGRAMMING ASSIGNMENT #6 \n")
     main()

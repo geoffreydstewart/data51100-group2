@@ -1,5 +1,6 @@
 # ignore the program output files
 as2/prog2-output-data.txt
+as6/pums.png
 
 # OSX noise
 .DS_Store
