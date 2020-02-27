@@ -27,8 +27,8 @@ def hhl_plot(fig, df):
     ax = fig.add_subplot(2, 2, 1)
     ax.axis('equal')
     ax.pie(hhl, startangle=-117)
-    ax.set_ylabel('HHL', fontsize=10)
-    ax.legend(languages, loc='upper left', bbox_to_anchor=(0, 0.95), prop={'size': 11.5})
+    ax.set_ylabel('HHL', fontsize=9)
+    ax.legend(languages, loc='upper left', bbox_to_anchor=(0, 0.95), prop={'size': 8.5})
 
     # add the title
     plt.title('Household Languages')
@@ -61,6 +61,7 @@ def vehicle_plot(fig, df):
     # create the bar chart
     ax = fig.add_subplot(2, 2, 3)
     ax.bar(veh.index, veh.WGTP / 1000, align='center', color='red', tick_label=[int(x) for x in veh.index])
+    ax.margins(0, 0.04)
     # add labels and title
     plt.ylabel('Thousands of Households')
     plt.xlabel('# of Vehicles')
@@ -94,8 +95,8 @@ def taxes_plot(fig, df):
 
 def main():
     # Create the figure
-    fig = plt.figure(figsize=(20, 10))
-    plt.subplots_adjust(wspace=.3, hspace=.3)
+    fig = plt.figure(figsize=(15, 8))
+    plt.subplots_adjust(wspace=.2, hspace=.4)
 
     # Read the csv file
     df = pd.read_csv("ss13hil.csv")
