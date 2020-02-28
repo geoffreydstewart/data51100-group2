@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 def hhl_plot(fig, df):
     hhl = df['HHL'].value_counts()
 
-    # add the legend
+    # define the legend labels
     languages = ['English only',
                  'Spanish',
                  'Other Indo-European languages',
@@ -28,6 +28,7 @@ def hhl_plot(fig, df):
     ax.axis('equal')
     ax.pie(hhl, startangle=-117)
     ax.set_ylabel('HHL', fontsize=9)
+    # add the legend
     ax.legend(languages, loc='upper left', bbox_to_anchor=(0, 0.95), prop={'size': 8.5})
 
     # add the title
@@ -38,13 +39,13 @@ def income_plot(fig, df):
     # filter out missing data
     hincp = df.HINCP[df.HINCP.notna()]
 
-    # create the histogram
     ax = fig.add_subplot(2, 2, 2)
     bins = np.logspace(1, 7, num=100, base=10)
 
+    # create the histogram
     ax.hist(x=hincp, density=True, bins=bins, histtype='bar', color='g', linewidth=0.6, alpha=0.5)
     plt.xscale('log', nonposx='clip', subsx=[1, 2, 3, 4, 5, 6, 7])
-    # hincp.plot.kde(ax=ax, style='--', color='black', logx=True)
+    # add the kernel density estimate plot
     hincp.plot(kind='kde', color='k', ls='dashed')
     ax.grid(False)
 
@@ -58,8 +59,8 @@ def vehicle_plot(fig, df):
     # aggregate the data
     veh = df.groupby('VEH').aggregate({'WGTP': 'sum'})
 
-    # create the bar chart
     ax = fig.add_subplot(2, 2, 3)
+    # create the bar chart
     ax.bar(veh.index, veh.WGTP / 1000, align='center', color='red', tick_label=[int(x) for x in veh.index])
     ax.margins(0, 0.04)
     # add labels and title
@@ -80,8 +81,8 @@ def taxes_plot(fig, df):
     # replace the value of TAXP with the mapping value
     df['TAXP'].replace(mapping, inplace=True)
 
-    # create the scatter plot
     ax = fig.add_subplot(2, 2, 4)
+    # create the scatter plot
     plt.scatter(df['VALP'], df['TAXP'], c=df['MRGP'], s=df['WGTP'], alpha=0.25, cmap='seismic')
     plt.colorbar(ticks=[0, 1250, 2500, 3750, 5000]).set_label('First Mortgage Payment (Monthly $)')
     plt.ylim(ymin=0, ymax=10400)
