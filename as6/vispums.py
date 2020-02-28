@@ -107,8 +107,10 @@ def main():
     vehicle_plot(fig, df)
     taxes_plot(fig, df)
 
+    plt.show()
+
     # Export to png file
-    plt.savefig('pums.png')
+    # plt.savefig('pums.png')
 
 
 if __name__ == "__main__":
